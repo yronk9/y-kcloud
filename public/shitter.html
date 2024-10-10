@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>shitter - bathroom finder</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #60a5fa;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 24px;
+            font-weight: 700;
+            z-index: 1000;
+            position: sticky;
+            top: 0;
+        }
+
+        #hamburger {
+            cursor: pointer;
+        }
+
+        #content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #search-container {
+            padding: 10px;
+            background-color: #fff;
+        }
+
+        #search-input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            -webkit-appearance: none;
+        }
+
+        #map-container {
+            display: flex;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        #map {
+            flex-grow: 1;
+            width: calc(100% - 300px);
+            margin-left: 300px;
+            transition: margin-left 0.3s ease;
+        }
+
+        #bathroom-list-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 300px;
+            height: 100%;
+            background-color: #fff;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        #bathroom-list-header {
+            background-color: #f0f0f0;
+            padding: 15px;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        #filter-options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.open-now-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: #fff;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196f3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.open-now-label {
+    margin-left: 10px;
+}
+
+        #bathroom-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        #bathroom-list li {
+            padding: 20px;
+            border-bottom: 1px solid #e1e8ed;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #bathroom-list li:hover {
+            background-color: #f5f8fa;
+        }
+
+        .bathroom-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .distance-container {
+            margin-right: 20px;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .distance {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1da1f2;
+        }
+
+        .distance-unit {
+            font-size: 14px;
+            color: #657786;
+        }
+
+        .bathroom-details {
+            flex-grow: 1;
+        }
+
+        .bathroom-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #14171a;
+            margin-bottom: 5px;
+        }
+
+        .bathroom-address {
+            font-size: 14px;
+            color: #657786;
+            margin-bottom: 5px;
+        }
+
+        .hours {
+            font-size: 14px;
+            color: #657786;
+        }
+
+        #collapse-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: white;
+            border: 1px solid #e1e8ed;
+            padding: 10px 5px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: left 0.3s ease;
+        }
+
+        #collapse-button::before {
+            content: "◀";
+        }
+
+        #bathroom-list-container.collapsed {
+            transform: translateX(-300px);
+        }
+
+        #bathroom-list-container.collapsed + #collapse-button {
+            left: 0;
+        }
+
+        #bathroom-list-container.collapsed + #collapse-button::before {
+            content: "▶";
+        }
+
+        #bathroom-list-container:not(.collapsed) + #collapse-button {
+            left: 300px;
+        }
+
+        #bathroom-list-container.collapsed ~ #map {
+            margin-left: 0;
+        }
+
+        #side-menu {
+            position: fixed;
+            top: 0;
+            right: -250px;
+            width: 250px;
+            height: 100%;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0,0,0,.2);
+            transition: right .3s ease;
+            z-index: 1001;
+        }
+
+        #side-menu.open {
+            right: 0;
+        }
+
+        #side-menu ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 60px;
+        }
+
+        #side-menu ul li {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,.5);
+            display: none;
+            z-index: 999;
+        }
+
+        #locate-button, #pin-button {
+            position: absolute;
+            background-color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            box-shadow: 0 2px 6px rgba(0,0,0,.3);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        #locate-button {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        #pin-button {
+            bottom: 70px;
+            right: 20px;
+        }
+
+        /* Customized scrollbar for Webkit browsers */
+        #bathroom-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #bathroom-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #bathroom-list::-webkit-scrollbar-thumb {
+            background-color: #1da1f2;
+            border-radius: 4px;
+        }
+
+        #bathroom-list::-webkit-scrollbar-thumb:hover {
+            background-color: #1a91da;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="header">
+            <span>shitter</span>
+            <svg id="hamburger" viewBox="0 0 100 80" width="30" height="30">
+                <rect width="100" height="15" fill="white"></rect>
+                <rect y="30" width="100" height="15" fill="white"></rect>
+                <rect y="60" width="100" height="15" fill="white"></rect>
+            </svg>
+        </div>
+        <div id="content">
+            <div id="search-container">
+                <input type="text" id="search-input" placeholder="Type a location...">
+            </div>
+            <div id="map-container">
+                <div id="bathroom-list-container">
+                    <div id="bathroom-list-header">
+                        <div id="filter-options">
+                            <div class="open-now-container">
+                                <label class="switch">
+                                    <input type="checkbox" id="open-now-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="open-now-label" font-size="auto">says they're open</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ul id="bathroom-list"></ul>
+                </div>
+                <button id="collapse-button" aria-label="Collapse list"></button>
+                <div id="map"></div>
+                <button id="locate-button" title="Snap to current location">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" fill="#4CAF50"/>
+                    </svg>
+                </button>
+                <button id="pin-button" title="Set pin location">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z" fill="#FF0000"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="side-menu">
+            <ul>
+                <li id="menu-map">Map</li>
+                <li id="menu-favourites">Favourites</li>
+                <li id="menu-settings">Settings</li>
+            </ul>
+        </div>
+        <div id="overlay"></div>
+    </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFfhSviT0m2MGNzE3QJYPRoE4F5e2-55w&libraries=places,geometry"></script>
+    <script src="geojson/edmonton_potential_bathrooms.geojson"></script>
+    <script>
+        let map, userMarker, pinMarker, watchId, currentPosition, restroomMarkers = [], directionsService, directionsRenderer, isPinMode = true, mapCenter, nextPageToken = null;
+        
+        const initMap = (position) => {
+            const lat = position ? position.coords.latitude : 0;
+            const lng = position ? position.coords.longitude : 0;
+            map = new google.maps.Map(document.getElementById('map'), {center: {lat, lng}, zoom: position ? 15 : 2});
+            mapCenter = map.getCenter();
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
+            if (position) {
+                updateUserPosition(position);
+                setPinPosition(position);
+                searchNearbyRestrooms(position);
+            }
+            setupSearchBox();
+            setupMapListeners();
+            
+            // Set OPEN NOW toggle to checked by default
+            document.getElementById('open-now-toggle').checked = true;
+        
+            // Setup collapsible bathroom list
+            setupCollapsibleList();
+        };
+        
+        const updateUserPosition = (position) => {
+            currentPosition = position;
+            const latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            if (!userMarker) {
+                userMarker = new google.maps.Marker({
+                    position: latLng,
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: "#4285F4",
+                        fillOpacity: 1,
+                        strokeColor: "#ffffff",
+                        strokeWeight: 2,
+                    },
+                });
+            } else {
+                userMarker.setPosition(latLng);
+            }
+        };
+        
+        const setPinPosition = (position) => {
+            const latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            if (!pinMarker) {
+                pinMarker = new google.maps.Marker({
+                    position: latLng,
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                        scale: 6,
+                        fillColor: "#FF0000",
+                        fillOpacity: 1,
+                        strokeColor: "#ffffff",
+                        strokeWeight: 2,
+                    },
+                });
+            } else {
+                pinMarker.setPosition(latLng);
+            }
+        };
+        
+        const searchNearbyRestrooms = (position) => {
+            const service = new google.maps.places.PlacesService(map);
+            const location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            const request = {
+                location: location,
+                rankBy: google.maps.places.RankBy.DISTANCE,
+                keyword: 'public restroom',
+                openNow: document.getElementById('open-now-toggle').checked
+            };
+            service.nearbySearch(request, handleRestroomResults);
+        };
+        
+        const handleRestroomResults = (results, status, pagination) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                clearRestroomMarkers();
+                const detailedResults = [];
+                let processed = 0;
+        
+                results.forEach((place, index) => {
+                    getPlaceDetails(place, (detailedPlace) => {
+                        detailedResults[index] = detailedPlace;
+                        processed++;
+        
+                        if (processed === results.length) {
+                            detailedResults.forEach(createRestroomMarker);
+                            updateBathroomList(detailedResults);
+                        }
+                    });
+                });
+        
+                nextPageToken = pagination && pagination.hasNextPage ? pagination.nextPage : null;
+            }
+        };
+        
+        const getPlaceDetails = (place, callback) => {
+            const service = new google.maps.places.PlacesService(map);
+            service.getDetails({
+                placeId: place.place_id,
+                fields: ['name', 'geometry', 'vicinity', 'opening_hours', 'rating']
+            }, (result, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    if (!result.opening_hours || !result.opening_hours.periods) {
+                        console.log(`No opening hours for ${result.name}, trying to get address hours`);
+                        getAddressHours(result.vicinity, (addressHours) => {
+                            result.address_hours = addressHours;
+                            callback(result);
+                        });
+                    } else {
+                        callback(result);
+                    }
+                } else {
+                    console.log(`Failed to get details for ${place.name}, status: ${status}`);
+                    callback(place);  // Fallback to original place data if details request fails
+                }
+            });
+        };
+        
+        const getAddressHours = (address, callback) => {
+            const service = new google.maps.places.PlacesService(map);
+            const request = {
+                query: address,
+                fields: ['name', 'opening_hours']
+            };
+            service.findPlaceFromQuery(request, (results, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results[0] && results[0].opening_hours) {
+                    callback(results[0].opening_hours);
+                } else {
+                    callback(null);
+                }
+            });
+        };
+        
+        const createRestroomMarker = (place) => {
+            const marker = new google.maps.Marker({
+                map: map,
+                position: place.geometry.location,
+                icon: {
+                    url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234CAF50"><path d="M12 2c-4.42 0-8 3.58-8 8 0 4.41 3.58 8 8 8s8-3.59 8-8c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 6 2.69 6 6-2.69 6-6 6zm3-7h-2V7h-2v2H9v2h2v2h2v-2h2v-2z"/></svg>',
+                    scaledSize: new google.maps.Size(32, 32)
+                }
+            });
+            restroomMarkers.push(marker);
+            google.maps.event.addListener(marker, 'click', () => {
+                showInfoWindow(place);
+                showDirections(place.geometry.location);
+            });
+        
+            if (place.name.includes('Sobeys')) {
+                console.log('Sobeys store found:', place);
+                console.log('Is open:', isOpen(place));
+                console.log('Opening hours:', place.opening_hours);
+                console.log('Address hours:', place.address_hours);
+            }
+        };
+        
+        const clearRestroomMarkers = () => {
+            restroomMarkers.forEach(marker => marker.setMap(null));
+            restroomMarkers = [];
+        };
+        
+        const startTracking = () => {
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(updateUserPosition, showError, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+                initMap();
+            }
+        };
+        
+        const showError = (error) => {
+            const errorMessages = {
+                1: "User denied the request for Geolocation.",
+                2: "Location information is unavailable.",
+                3: "The request to get user location timed out.",
+                0: "An unknown error occurred."
+            };
+            alert(errorMessages[error.code] || errorMessages[0]);
+            initMap();
+        };
+        
+        const focusOnCurrentLocation = () => {
+            if (currentPosition) {
+                const latLng = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
+                map.panTo(latLng);
+                map.setZoom(15);
+                setPinPosition(currentPosition);
+                searchNearbyRestrooms(currentPosition);
+            } else {
+                alert("Current location is not available.");
+            }
+        };
+        
+        const toggleMenu = () => {
+            document.getElementById('side-menu').classList.toggle('open');
+            document.getElementById('overlay').style.display = document.getElementById('overlay').style.display === 'block' ? 'none' : 'block';
+        };
+        
+        const updateBathroomList = (results) => {
+            const bathroomList = document.getElementById('bathroom-list');
+            bathroomList.innerHTML = '';
+            const referencePoint = pinMarker.getPosition();
+            const openNow = document.getElementById('open-now-toggle').checked;
+        
+            results
+                .filter(place => !openNow || isOpen(place))
+                .sort((a, b) => {
+                    const distanceA = google.maps.geometry.spherical.computeDistanceBetween(referencePoint, a.geometry.location);
+                    const distanceB = google.maps.geometry.spherical.computeDistanceBetween(referencePoint, b.geometry.location);
+                    return distanceA - distanceB;
+                })
+                .forEach(place => {
+                    const listItem = document.createElement('li');
+                    const distance = google.maps.geometry.spherical.computeDistanceBetween(referencePoint, place.geometry.location);
+                    const distanceInKm = (distance / 1000).toFixed(2);
+
+                    listItem.innerHTML = `
+                        <div class="bathroom-item">
+                            <div class="distance-container">
+                                <div class="distance">${distanceInKm}</div>
+                                <div class="distance-unit">km</div>
+                            </div>
+                            <div class="bathroom-details">
+                                <div class="bathroom-name">${place.name}</div>
+                                <div class="bathroom-address">${place.vicinity}</div>
+                                <small>Rating: ${place.rating ? place.rating.toFixed(1) + '/5' : 'N/A'}</small>
+                                <div class="hours">${getOpeningHours(place)}</div>
+                            </div>
+                        </div>
+                    `;
+                    listItem.addEventListener('click', () => {
+                        map.panTo(place.geometry.location);
+                        map.setZoom(17);
+                        showInfoWindow(place);
+                        showDirections(place.geometry.location);
+                    });
+                    bathroomList.appendChild(listItem);
+                });
+        };
+
+        const isOpen = (place) => {
+            const openingHours = place.opening_hours || place.address_hours;
+            if (!openingHours || !openingHours.periods) {
+                console.log(`No opening hours data for ${place.name}`);
+                return false;
+            }
+
+            const now = new Date();
+            const today = now.getDay();
+            const currentTime = now.getHours() * 100 + now.getMinutes();
+
+            console.log(`Checking if ${place.name} is open. Current time: ${currentTime}, Day: ${today}`);
+
+            // Find the period for today
+            const todayHours = openingHours.periods.find(period => period.open.day === today);
+
+            if (!todayHours) {
+                console.log(`No hours defined for today (${today}) for ${place.name}`);
+                return false;
+            }
+
+            const openTime = parseInt(todayHours.open.time);
+            const closeTime = parseInt(todayHours.close ? todayHours.close.time : '2359');
+
+            console.log(`${place.name} - Open: ${openTime}, Close: ${closeTime}, Current: ${currentTime}`);
+
+            if (closeTime > openTime) {
+                // Normal case: opens and closes on the same day
+                return currentTime >= openTime && currentTime < closeTime;
+            } else {
+                // Handles cases where the place closes after midnight
+                return currentTime >= openTime || currentTime < closeTime;
+            }
+        };
+
+        const getOpeningHours = (place) => {
+            const openingHours = place.opening_hours || place.address_hours;
+            if (openingHours) {
+                if (openingHours.periods) {
+                    const today = new Date().getDay();
+                    const todayHours = openingHours.periods.find(period => period.open.day === today);
+                    if (todayHours) {
+                        const openTime = formatTime(todayHours.open.time);
+                        const closeTime = formatTime(todayHours.close.time);
+                        return `Open today: ${openTime} - ${closeTime}`;
+                    }
+                }
+                if (openingHours.weekday_text) {
+                    const today = new Date().toLocaleString('en-us', {weekday: 'long'});
+                    const todayHours = openingHours.weekday_text.find(dayText => dayText.startsWith(today));
+                    if (todayHours) {
+                        return todayHours.replace(`${today}: `, 'Open today: ');
+                    }
+                }
+                if (openingHours.isOpen && openingHours.isOpen()) {
+                    return 'Open now';
+                } else {
+                    return 'Closed now';
+                }
+            }
+            return 'Hours not available';
+        };
+
+        const formatTime = (timeString) => {
+            const hours = parseInt(timeString.substr(0, 2));
+            const minutes = timeString.substr(2);
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const formattedHours = hours % 12 || 12;
+            return `${formattedHours}:${minutes} ${ampm}`;
+        };
+
+        const showDirections = (destination) => {
+            const start = pinMarker.getPosition();
+            const url = `https://www.google.com/maps/dir/?api=1&origin=${start.lat()},${start.lng()}&destination=${destination.lat()},${destination.lng()}&travelmode=walking`;
+            window.open(url, '_blank');
+        };
+
+        const togglePinMode = () => {
+            isPinMode = !isPinMode;
+            document.getElementById('pin-button').style.backgroundColor = isPinMode ? '#f0f0f0' : 'white';
+        };
+
+        const showInfoWindow = (place) => {
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <strong>${place.name}</strong><br>
+                    ${place.vicinity}<br>
+                    ${getOpeningHours(place)}<br>
+                    Rating: ${place.rating ? place.rating.toFixed(1) + '/5' : 'N/A'}
+                `
+            });
+            infoWindow.setPosition(place.geometry.location);
+            infoWindow.open(map);
+        };
+
+        const setupSearchBox = () => {
+    const input = document.getElementById('search-input');
+    const searchBox = new google.maps.places.SearchBox(input);
+    map.addListener('bounds_changed', () => {
+        searchBox.setBounds(map.getBounds());
+        mapCenter = map.getCenter();
+    });
+    searchBox.addListener('places_changed', () => {
+        const places = searchBox.getPlaces();
+        if (places.length === 0) return;
+        const bounds = new google.maps.LatLngBounds();
+        places.forEach(place => {
+            if (place.geometry && place.geometry.location) {
+                if (place.geometry.viewport) {
+                    bounds.union(place.geometry.viewport);
+                } else {
+                    bounds.extend(place.geometry.location);
+                }
+            }
+        });
+        map.fitBounds(bounds);
+        mapCenter = map.getCenter();
+        setPinPosition({coords: {latitude: mapCenter.lat(), longitude: mapCenter.lng()}});
+        searchNearbyRestrooms({coords: {latitude: mapCenter.lat(), longitude: mapCenter.lng()}});
+    });
+};
+
+const setupMapListeners = () => {
+    map.addListener('click', (e) => {
+        if (isPinMode) {
+            setPinPosition({coords: {latitude: e.latLng.lat(), longitude: e.latLng.lng()}});
+            searchNearbyRestrooms({coords: {latitude: e.latLng.lat(), longitude: e.latLng.lng()}});
+        }
+    });
+    document.getElementById('locate-button').addEventListener('click', focusOnCurrentLocation);
+    document.getElementById('pin-button').addEventListener('click', togglePinMode);
+    document.getElementById('open-now-toggle').addEventListener('change', () => searchNearbyRestrooms({coords: {latitude: pinMarker.getPosition().lat(), longitude: pinMarker.getPosition().lng()}}));
+};
+
+const setupCollapsibleList = () => {
+    const listContainer = document.getElementById('bathroom-list-container');
+    const collapseButton = document.getElementById('collapse-button');
+    const mapDiv = document.getElementById('map');
+
+    collapseButton.addEventListener('click', () => {
+        listContainer.classList.toggle('collapsed');
+        mapDiv.classList.toggle('expanded');
+
+        // Trigger a resize event on the map to ensure it updates correctly
+        google.maps.event.trigger(map, 'resize');
+
+        // Update the button content
+        collapseButton.innerHTML = listContainer.classList.contains('collapsed') ? '▶' : '◀';
+
+        // Adjust map center after collapse/expand
+        if (map) {
+            const center = map.getCenter();
+            google.maps.event.trigger(map, 'resize');
+            map.setCenter(center);
+        }
+    });
+};
+
+window.onload = () => {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                initMap(position);
+                startTracking();
+            },
+            showError
+        );
+    } else {
+        alert("Geolocation is not supported by this browser.");
+        initMap();
+    }
+
+    document.getElementById('hamburger').addEventListener('click', toggleMenu);
+    document.getElementById('overlay').addEventListener('click', toggleMenu);
+    ['map', 'favourites', 'settings'].forEach(item => {
+        document.getElementById(`menu-${item}`).addEventListener('click', () => {
+            alert(`${item.charAt(0).toUpperCase() + item.slice(1)} option clicked`);
+            toggleMenu();
+        });
+    });
+};
+</script>
+</body>
+</html>
