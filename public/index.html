@@ -78,6 +78,21 @@
             display: inline-block;
             opacity: 0;
         }
+
+        @media screen and (orientation: landscape) and (max-height: 500px) {
+            header, footer {
+                display: none;
+            }
+
+            main {
+                margin-top: 0;
+                padding-top: 10px;
+            }
+
+            body {
+                overflow-y: auto;
+            }
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 </head>

@@ -142,6 +142,21 @@
             font-size: 0.8rem;
             margin-top: 10px;
         }
+
+        @media screen and (orientation: landscape) and (max-height: 500px) {
+            header, footer {
+                display: none;
+            }
+
+            main {
+                margin-top: 0;
+                padding-top: 10px;
+            }
+
+            body {
+                overflow-y: auto;
+            }
+        }
     </style>
 </head>
 <body>
