@@ -5,30 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yron's Website - Home</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
-        header { background: #f4f4f4; padding: 1rem; }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        header {
+            background: #f4f4f4;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
         nav { margin-top: 1rem; }
         main { margin-top: 20px; }
         footer { margin-top: 20px; text-align: center; font-size: 0.8rem; }
+        .social-icons a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #333;
+        }
+        .social-icons a img {
+            width: 24px;
+            height: 24px;
+        }
+        .spotify-embed { margin-top: 20px; text-align: center; display: none; }
+        .text-animation {
+            opacity: 0;
+            hyphens: auto;
+            -webkit-hyphens: auto;
+            -ms-hyphens: auto;
+        }
+        .text-animation .word {
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .text-animation .letter {
+            display: inline-block;
+            opacity: 0;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 </head>
 <body>
     <header>
         <h1>YRON'S WEBSITE</h1>
         <nav>
-            <a href="index.html">View all</a> |
-            <a href="games.html">Games</a> |
+            <a href="games.html">Projects</a> |
             <a href="cv.html">Computer Vision</a> |
             <a href="contact.html">Contact</a>
         </nav>
     </header>
     <main>
-        <h2>Welcome to My Website</h2>
-        <p>This is the home page of my personal website. Here you can find information about my projects and interests.</p>
-        <p>Feel free to explore the other pages to learn more about my work in games and computer vision!</p>
+        <h2 class="text-animation">Hello!</h2>
+        <p class="text-animation">This is the home page of my personal website.</p>
+        <p class="text-animation">Here you can find information about my projects and interests.</p>
+        <p class="text-animation">My interests and skills span diverse fields including culinary arts, software engineering, game development, project management, and computer vision.</p>
+        <p class="text-animation">Feel free to explore the other pages to learn more about me and my work!</p>
+        <p class="text-animation">In the meantime, here's a Spotify playlist I recommend for while you work:</p>
     </main>
+    <div class="spotify-embed">
+        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/3QX3kcdmy7cPaeIwmZZFJs?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    </div>
     <footer>
         <p>&copy; 2024 Yron Keith Gerona. All rights reserved.</p>
+        <div class="social-icons">
+            <a href="https://www.instagram.com/y.ro.n" target="_blank" aria-label="Instagram">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+            </a>
+            <a href="https://github.com/yronk9" target="_blank" aria-label="GitHub">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub">
+            </a>
+            <a href="https://linkedin.com/in/yron" target="_blank" aria-label="LinkedIn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn">
+            </a>
+        </div>
     </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const textElements = document.querySelectorAll('.text-animation');
+            let delay = 0;
+            textElements.forEach((el, index) => {
+                const words = el.textContent.split(' ');
+                el.textContent = '';
+                words.forEach(word => {
+                    const wordSpan = document.createElement('span');
+                    wordSpan.className = 'word';
+                    word.split('').forEach(letter => {
+                        const letterSpan = document.createElement('span');
+                        letterSpan.className = 'letter';
+                        letterSpan.textContent = letter;
+                        wordSpan.appendChild(letterSpan);
+                    });
+                    el.appendChild(wordSpan);
+                    el.appendChild(document.createTextNode(' '));
+                });
+                el.style.opacity = 1; // Make the container visible
+                anime.timeline({loop: false})
+                    .add({
+                        targets: el.querySelectorAll('.letter'),
+                        opacity: [0,1],
+                        easing: "easeInOutQuad",
+                        duration: 50,
+                        delay: (el, i) => 25 * (i+1) + delay
+                    });
+                delay += el.textContent.length * 25 + 500; // Additional delay between paragraphs
+            });
+            // Show Spotify embed after all text animations
+            setTimeout(() => {
+                document.querySelector('.spotify-embed').style.display = 'block';
+            }, delay);
+        });
+    </script>
 </body>
 </html>

@@ -390,9 +390,8 @@ input:checked + .slider:before {
         </div>
         <div id="side-menu">
             <ul>
-                <li id="menu-map">Map</li>
-                <li id="menu-favourites">Favourites</li>
-                <li id="menu-settings">Settings</li>
+                <li id="menu-home">Home</li>
+                <li id="menu-games">Games</li>
             </ul>
         </div>
         <div id="overlay"></div>
@@ -824,10 +823,19 @@ window.onload = () => {
 
     document.getElementById('hamburger').addEventListener('click', toggleMenu);
     document.getElementById('overlay').addEventListener('click', toggleMenu);
-    ['map', 'favourites', 'settings'].forEach(item => {
+
+    // Adding click events for the Home and Games menu items
+    ['home', 'games'].forEach(item => {
         document.getElementById(`menu-${item}`).addEventListener('click', () => {
-            alert(`${item.charAt(0).toUpperCase() + item.slice(1)} option clicked`);
-            toggleMenu();
+            // Navigate to the correct page
+            const page = item.toLowerCase() === 'home' ? 'index.html' : 'games.html';
+            window.location.href = page;
+
+            // Optional alert for feedback (can be removed if not needed)
+            //alert(`${item} option clicked`);
+
+            // Close the menu after clicking
+            //toggleMenu();
         });
     });
 };

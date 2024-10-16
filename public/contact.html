@@ -5,30 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yron's Website - Contact</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
-        header { background: #f4f4f4; padding: 1rem; }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        header {
+            background: #f4f4f4;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
         nav { margin-top: 1rem; }
         main { margin-top: 20px; }
         footer { margin-top: 20px; text-align: center; font-size: 0.8rem; }
+        .social-icons a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #333;
+        }
+        .social-icons a img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .text-animation {
+            opacity: 0;
+            hyphens: auto;
+            -webkit-hyphens: auto;
+            -ms-hyphens: auto;
+        }
+        .text-animation .word {
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .text-animation .letter {
+            display: inline-block;
+            opacity: 0;
+        }
+        .no-animation { opacity: 1; }
+        /* New style for the clickable header */
+        .site-title {
+            text-decoration: none;
+            color: inherit;
+        }
+        .site-title:hover {
+            text-decoration: underline;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 </head>
 <body>
     <header>
-        <h1>YRON'S WEBSITE</h1>
+        <h1><a href="index.html" class="site-title">YRON'S WEBSITE</a></h1>
         <nav>
-            <a href="index.html">View all</a> |
-            <a href="games.html">Games</a> |
+            <a href="games.html">Projects</a> |
             <a href="cv.html">Computer Vision</a> |
             <a href="contact.html">Contact</a>
         </nav>
     </header>
     <main>
-        <h2>Contact Me</h2>
-        <p>You can reach me at: info@y-k.cloud</p>
-        <p>Feel free to get in touch if you have any questions about my projects or if you're interested in collaboration!</p>
+        <h2 class="text-animation">Want to hire me?</h2>
+        <p>
+            <span class="text-animation">You can reach me at: </span>
+            <a href="mailto:ykgerona@gmail.com" class="text-animation">ykgerona@gmail.com</a>
+        </p>
+        <p class="text-animation">Feel free to get in touch if you have any questions about my projects or if you're interested in collaboration!</p>
     </main>
     <footer>
         <p>&copy; 2024 Yron Keith Gerona. All rights reserved.</p>
+        <div class="social-icons">
+            <a href="https://www.instagram.com/y.ro.n" target="_blank" aria-label="Instagram">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+            </a>
+            <a href="https://github.com/yronk9" target="_blank" aria-label="GitHub">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub">
+            </a>
+            <a href="https://linkedin.com/in/yron" target="_blank" aria-label="LinkedIn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn">
+            </a>
+        </div>
     </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const textElements = document.querySelectorAll('.text-animation');
+            let delay = 0;
+            textElements.forEach((el, index) => {
+                const words = el.textContent.split(' ');
+                el.textContent = '';
+                words.forEach(word => {
+                    const wordSpan = document.createElement('span');
+                    wordSpan.className = 'word';
+                    word.split('').forEach(letter => {
+                        const letterSpan = document.createElement('span');
+                        letterSpan.className = 'letter';
+                        letterSpan.textContent = letter;
+                        wordSpan.appendChild(letterSpan);
+                    });
+                    el.appendChild(wordSpan);
+                    el.appendChild(document.createTextNode(' '));
+                });
+                el.style.opacity = 1; // Make the container visible
+                anime.timeline({loop: false})
+                    .add({
+                        targets: el.querySelectorAll('.letter'),
+                        opacity: [0,1],
+                        easing: "easeInOutQuad",
+                        duration: 50,
+                        delay: (el, i) => 25 * (i+1) + delay
+                    });
+                delay += el.textContent.length * 25 + 500; // Additional delay between paragraphs
+            });
+        });
+    </script>
 </body>
 </html>

@@ -3,38 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yron's Website - Games</title>
+    <title>Yron's Website - Projects</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
-        header { background: #f4f4f4; padding: 1rem; }
-        nav { margin-top: 1rem; }
+        header {
+            background: #f4f4f4;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        nav { margin-top: 1rem; display: block; }
         main { margin-top: 20px; }
         footer { margin-top: 20px; text-align: center; font-size: 0.8rem; }
+        .social-icons a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #333;
+        }
+        .social-icons a img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .site-title {
+            text-decoration: none;
+            color: inherit;
+        }
+        .site-title:hover {
+            text-decoration: underline;
+        }
+
+        .pdf-slideshow-container {
+            max-width: 100%;
+            position: relative;
+            margin: auto;
+        }
+        #pdf-canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            padding: 16px;
+            margin-top: -22px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.6s ease;
+            user-select: none;
+            background-color: rgba(0,0,0,0.8);
+            border-radius: 0 3px 3px 0;
+        }
+        .prev { left: 0; }
+        .next {
+            right: 0;
+            border-radius: 3px 0 0 3px;
+        }
+        .prev:hover, .next:hover {
+            background-color: rgba(0,0,0,0.9);
+        }
+        .page-number {
+            color: #f2f2f2;
+            font-size: 12px;
+            padding: 8px 12px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 0 0 5px 5px;
+        }
+
+        .pdf-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+
+        .image-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .project-image {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .image-subtitle {
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>YRON'S WEBSITE</h1>
+        <h1><a href="index.html" class="site-title">YRON'S WEBSITE</a></h1>
         <nav>
-            <a href="index.html">View all</a> |
-            <a href="games.html">Games</a> |
+            <a href="games.html">Projects</a> |
             <a href="cv.html">Computer Vision</a> |
             <a href="contact.html">Contact</a>
         </nav>
     </header>
     <main>
-        <h2>My Game Projects</h2>
+        <h2>Capstone Project</h2>
+
+        <p class="image-subtitle">Video demonstration of gameplay:</p>
+        <div class="pdf-container">
+            <iframe src="https://drive.google.com/file/d/1AeY8-R9OSjKKCI-u9PpM_X0OTA44IdHK/preview" title="Bug Snatch Demo"></iframe>
+        </div>
+
+        <p><strong>Project Overview</strong><br>
+        At the Stanley A. Milner branch, <strong>Bug Snatch</strong> (2023), is an interactive experience designed for the Edmonton Public Library's digital wall, developed collaboratively by our team of four. This game was created in collaboration with MacEwan University for our capstone project.</p>
+
+        <p>The game runs on the Unity engine and spans across three panels controlled by a single virtual machine, ensuring a captivating experience for players of all ages.</p>
+
+        <p><strong>Development Process</strong><br>
+        Our journey began with brainstorming sessions where we generated ideas and presented a game proposal to the EPL. Following client feedback, we focused on a bug-catching game concept. Our development process adhered to Agile methodology (SCRUM), allowing us to manage tasks efficiently through weekly meetings and regular communication on Discord, with version control handled via GitHub.</p>
+
+        <p><strong>Design and Technical Features</strong><br>
+        The game features various technical elements, including:
         <ul>
-            <li><a href="shitter.html">Shitter</a> - A unique and relatable Google Maps experience</li>
-            <li><a href="pong.html">Pong</a> - A classic arcade game reimagined</li>
-            <li><a href="dailyword.html">Daily Word</a> - Guess a random four-letter word</li>
-            <li><a href="charioteer.html">Charioteer</a> - Watch a charioteer make its way up to the heavens</li>
-            <li><a href="bug-snatch.html">Bug Snatch</a> - An exciting bug-catching adventure at the Edmonton Public Library</li>
+            <li>Interactive buttons and PlayerPrefs for user preferences.</li>
+            <li>Random bug pathing and Bezier curve pathing to create dynamic gameplay.</li>
+            <li>Bug spawning mechanics to enhance engagement.</li>
         </ul>
-        <p>These are some of the game projects I've been working on. Each project explores different aspects of game development and design. Click on the links to learn more about each game!</p>
+        </p>
+
+        <p><strong>Challenges and Solutions</strong><br>
+        We encountered some challenges early on with the new technologies and defining the scope of our game, particularly regarding its complexity and target audience. User testing proved essential, enabling us to refine the UI and UX based on feedback from children, our intended audience. This iterative process involved considerable trial and error to ensure we created a user-friendly experience.</p>
+
+        <p><strong>Outcome</strong><br>
+        This project not only strengthened my proficiency in Unity and C# but also improved my skills in project management, UX/UI design, and interdisciplinary collaboration. Working alongside a team and a client taught me the importance of effective communication and organization in achieving project goals.</p>
+
+        <p><strong>Slides</strong><br>
+        See the capstone presentation slides:</p>
+        <div class="pdf-slideshow-container">
+            <canvas id="pdf-canvas"></canvas>
+            <div class="page-number">Page <span id="page-num"></span> / <span id="page-count"></span></div>
+            <a class="prev" onclick="changePage(-1)">&#10094;</a>
+            <a class="next" onclick="changePage(1)">&#10095;</a>
+        </div>
+        <p> Please email me at <a href="mailto:ykgerona@gmail.com">ykgerona@gmail.com</a> if you would like to know more!</p>
+
+        <h2>Games</h2>
+        <ul>
+            <li>
+                <a href="https://www.epl.ca/digital-exhibits/#">Bug Snatch</a> - Built with Unity and C#, this interactive game is a bug-catching adventure designed for all ages, featured <i>exclusively</i> at the Edmonton Public Library.
+            </li>
+            <li>
+                <a href="pong.html">Pong</a> - Developed using HTML with JS, this reimagined classic brings the fun of Pong to a new level, simulating the feel of a real tennis match.
+            </li>
+            <li>
+                <a href="dailyword.html">Daily Word</a> - <i>iPhone/Web only</i> - A brain-teasing HTML game built with JS, where players challenge themselves to guess a random four-letter word daily.
+            </li>
+        </ul>
+
+        <h2>Miscellaneous Projects</h2>
+        <ul>
+            <li>
+                <a href="shitter.html">Shitter</a> - Utilizing Google Maps API, this practical app helps users find bathrooms nearby, designed to provide convenience and reliability.
+            </li>
+        </ul>
+
+        <div class="image-container">
+            <p class="image-subtitle">Locations of potential public bathrooms in Edmonton, 2024</p>
+            <img src="https://i.ibb.co/g4LjTdH/Screenshot-2024-10-15-at-5-46-56-PM.png" alt="edmonton-potential-bathrooms-map" class="project-image">
+        </div>
     </main>
     <footer>
         <p>&copy; 2024 Yron Keith Gerona. All rights reserved.</p>
+        <div class="social-icons">
+            <a href="https://www.instagram.com/y.ro.n" target="_blank" aria-label="Instagram">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+            </a>
+            <a href="https://github.com/yronk9" target="_blank" aria-label="GitHub">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub">
+            </a>
+            <a href="https://linkedin.com/in/yron" target="_blank" aria-label="LinkedIn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn">
+            </a>
+        </div>
     </footer>
+
+    <script>
+        let pdfDoc = null,
+            pageNum = 1,
+            pageRendering = false,
+            pageNumPending = null,
+            scale = 1.5,
+            canvas = document.getElementById('pdf-canvas'),
+            ctx = canvas.getContext('2d');
+
+        function renderPage(num) {
+            pageRendering = true;
+            pdfDoc.getPage(num).then(function(page) {
+                let viewport = page.getViewport({scale: scale});
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                let renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                let renderTask = page.render(renderContext);
+
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+
+            document.getElementById('page-num').textContent = num;
+        }
+
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num);
+            }
+        }
+
+        function changePage(offset) {
+            pageNum = Math.max(1, Math.min(pdfDoc.numPages, pageNum + offset));
+            queueRenderPage(pageNum);
+        }
+
+        pdfjsLib.getDocument('Capstone-bugsnatch.pdf').promise.then(function(pdfDoc_) {
+            pdfDoc = pdfDoc_;
+            document.getElementById('page-count').textContent = pdfDoc.numPages;
+
+            renderPage(pageNum);
+        });
+    </script>
 </body>
 </html>
