@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yron's Website - Computer Vision</title>
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
         header {
             background: #f4f4f4;
@@ -19,8 +26,21 @@
             text-align: center;
         }
         nav { margin-top: 1rem; }
-        main { margin-top: 20px; }
-        footer { margin-top: 20px; text-align: center; font-size: 0.8rem; }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        footer {
+            padding: 80px 0;
+            text-align: center;
+            font-size: 0.8rem;
+            background: #f4f4f4;
+        }
         .social-icons a {
             margin: 0 10px;
             text-decoration: none;
@@ -30,7 +50,6 @@
             width: 24px;
             height: 24px;
         }
-
         .text-animation {
             opacity: 0;
             hyphens: auto;
@@ -45,7 +64,13 @@
             display: inline-block;
             opacity: 0;
         }
-        /* Slideshow Styles */
+        .site-title {
+            text-decoration: none;
+            color: inherit;
+        }
+        .site-title:hover {
+            text-decoration: underline;
+        }
         .slideshow-container {
             max-width: 50%;
             position: relative;
@@ -62,27 +87,15 @@
             cursor: pointer;
             position: absolute;
             top: 50%;
-            width: auto;
             padding: 16px;
-            margin-top: -22px;
-            color: white;
             font-weight: bold;
             font-size: 18px;
             transition: 0.6s ease;
-            border-radius: 0 3px 3px 0;
+            border-radius: 3px;
             user-select: none;
         }
         .next {
             right: 0;
-            border-radius: 3px 0 0 3px;
-        }
-        /* New style for the clickable header */
-        .site-title {
-            text-decoration: none;
-            color: inherit;
-        }
-        .site-title:hover {
-            text-decoration: underline;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -97,25 +110,20 @@
         </nav>
     </header>
     <main>
-        <!-- Slideshow Container -->
         <div class="slideshow-container">
             <div class="mySlides">
                 <img src="https://i.ibb.co/6NMPMXg/Screenshot-2024-10-10-000339.png" alt="Stream image">
             </div>
-            <!-- Navigation Arrows -->
             <a class="prev" onclick="plusSlides(-1)">❮</a>
             <a class="next" onclick="plusSlides(1)">❯</a>
         </div>
-
-        <!-- Project List -->
         <h2 class="text-animation">Computer Vision Projects</h2>
         <ul>
-            <li class="text-animation">Project 1 (see above): Object and text detection in real-time video to be developed into a simulated stream chat. (Live text recognized seen in cyan)</li>
+            <li class="text-animation">Project 1: Object and text detection in real-time video to be developed into a simulated stream chat.</li>
             <li class="text-animation">Project 2: Eye contact correction tool for webcams (Pending)</li>
             <li class="text-animation">Project 3: Inventory counter (Pending)</li>
         </ul>
-        <p class="text-animation">These projects are intended to showcase my work in the field of computer vision, demonstrating various applications and techniques. I am still learning how to effectively use PyTorch, Open CV, and YOLO with Coco.</p>
-        <p class="text-animation">Currently, I am using untrained models, but I plan to develop a trained model once I work on a more complex project.</p>
+        <p class="text-animation">These projects showcase my work in computer vision, demonstrating various techniques.</p>
     </main>
     <footer>
         <p>&copy; 2024 Yron Keith Gerona. All rights reserved.</p>
@@ -131,9 +139,7 @@
             </a>
         </div>
     </footer>
-
     <script>
-        // Slideshow JavaScript
         let slideIndex = 1;
         showSlides(slideIndex);
         function plusSlides(n) {
@@ -149,10 +155,7 @@
             }
             slides[slideIndex-1].style.display = "block";
         }
-        // Optional: Slideshow automation
-        setInterval(function() { plusSlides(1); }, 3000); // Change every 3 seconds
-
-        // Text animation
+        setInterval(function() { plusSlides(1); }, 3000);
         document.addEventListener('DOMContentLoaded', (event) => {
             const textElements = document.querySelectorAll('.text-animation');
             let delay = 0;
@@ -171,7 +174,7 @@
                     el.appendChild(wordSpan);
                     el.appendChild(document.createTextNode(' '));
                 });
-                el.style.opacity = 1; // Make the container visible
+                el.style.opacity = 1;
                 anime.timeline({loop: false})
                     .add({
                         targets: el.querySelectorAll('.letter'),
@@ -180,7 +183,7 @@
                         duration: 50,
                         delay: (el, i) => 25 * (i+1) + delay
                     });
-                delay += el.textContent.length * 25 + 500; // Additional delay between paragraphs
+                delay += el.textContent.length * 25 + 500;
             });
         });
     </script>

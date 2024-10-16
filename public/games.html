@@ -199,14 +199,14 @@
             <a href="https://github.com/yronk9" target="_blank" aria-label="GitHub">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub">
             </a>
-            <a href="https://linkedin.com/in/yron" target="_blank" aria-label="LinkedIn">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn">
+            <a href="https://www.linkedin.com/in/yron" target="_blank" aria-label="LinkedIn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/LinkedIn_icon_circle.svg" alt="LinkedIn">
             </a>
         </div>
     </footer>
-
     <script>
-        let pdfDoc = null,
+        var url = 'Capstone-bugsnatch.pdf';
+        var pdfDoc = null,
             pageNum = 1,
             pageRendering = false,
             pageNumPending = null,
@@ -214,20 +214,24 @@
             canvas = document.getElementById('pdf-canvas'),
             ctx = canvas.getContext('2d');
 
+        pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
+            pdfDoc = pdfDoc_;
+            document.getElementById('page-count').textContent = pdfDoc.numPages;
+            renderPage(pageNum);
+        });
+
         function renderPage(num) {
             pageRendering = true;
-            pdfDoc.getPage(num).then(function(page) {
-                let viewport = page.getViewport({scale: scale});
+            pdfDoc.getPage(num).then(function (page) {
+                var viewport = page.getViewport({ scale: scale });
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
-
-                let renderContext = {
+                var renderContext = {
                     canvasContext: ctx,
                     viewport: viewport
                 };
-                let renderTask = page.render(renderContext);
-
-                renderTask.promise.then(function() {
+                var renderTask = page.render(renderContext);
+                renderTask.promise.then(function () {
                     pageRendering = false;
                     if (pageNumPending !== null) {
                         renderPage(pageNumPending);
@@ -235,29 +239,15 @@
                     }
                 });
             });
-
             document.getElementById('page-num').textContent = num;
         }
 
-        function queueRenderPage(num) {
-            if (pageRendering) {
-                pageNumPending = num;
-            } else {
-                renderPage(num);
+        function changePage(offset) {
+            if (pageNum + offset >= 1 && pageNum + offset <= pdfDoc.numPages) {
+                pageNum += offset;
+                renderPage(pageNum);
             }
         }
-
-        function changePage(offset) {
-            pageNum = Math.max(1, Math.min(pdfDoc.numPages, pageNum + offset));
-            queueRenderPage(pageNum);
-        }
-
-        pdfjsLib.getDocument('Capstone-bugsnatch.pdf').promise.then(function(pdfDoc_) {
-            pdfDoc = pdfDoc_;
-            document.getElementById('page-count').textContent = pdfDoc.numPages;
-
-            renderPage(pageNum);
-        });
     </script>
 </body>
 </html>
