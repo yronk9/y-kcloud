@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yron's Website - Contact</title>
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
         header {
             background: #f4f4f4;
@@ -19,8 +26,27 @@
             text-align: center;
         }
         nav { margin-top: 1rem; }
-        main { margin-top: 20px; }
-        footer { margin-top: 20px; text-align: center; font-size: 0.8rem; }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .content-wrapper {
+            max-width: 600px;
+            width: 100%;
+            transition: transform 0.5s ease-out;
+        }
+        footer {
+            padding: 10px 0;
+            text-align: center;
+            font-size: 0.8rem;
+            background: #f4f4f4;
+        }
         .social-icons a {
             margin: 0 10px;
             text-decoration: none;
@@ -30,12 +56,12 @@
             width: 24px;
             height: 24px;
         }
-
         .text-animation {
             opacity: 0;
             hyphens: auto;
             -webkit-hyphens: auto;
             -ms-hyphens: auto;
+            margin: 10px 0;
         }
         .text-animation .word {
             display: inline-block;
@@ -45,14 +71,31 @@
             display: inline-block;
             opacity: 0;
         }
-        .no-animation { opacity: 1; }
-        /* New style for the clickable header */
         .site-title {
             text-decoration: none;
             color: inherit;
         }
         .site-title:hover {
             text-decoration: underline;
+        }
+        .mailto-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            transition: background-color 0.3s, opacity 0.5s;
+            opacity: 0; /* Start hidden */
+        }
+        .mailto-link:hover {
+            background-color: #45a049;
+        }
+        .mailto-link span {
+            opacity: 0; /* Start with text hidden */
+            transition: opacity 0.5s;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -67,12 +110,13 @@
         </nav>
     </header>
     <main>
-        <h2 class="text-animation">Want to hire me?</h2>
-        <p>
-            <span class="text-animation">You can reach me at: </span>
-            <a href="mailto:ykgerona@gmail.com" class="text-animation">ykgerona@gmail.com</a>
-        </p>
-        <p class="text-animation">Feel free to get in touch if you have any questions about my projects or if you're interested in collaboration!</p>
+        <div class="content-wrapper">
+            <h2 class="text-animation">Want to hire me?</h2>
+            <p class="text-animation">Feel free to get in touch if you have any questions about my projects or if you're interested in collaboration!</p>
+            <a href="mailto:ykgerona@gmail.com" class="mailto-link text-animation">
+                <span>Send an email</span>
+            </a>
+        </div>
     </main>
     <footer>
         <p>&copy; 2024 Yron Keith Gerona. All rights reserved.</p>
@@ -91,32 +135,77 @@
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
             const textElements = document.querySelectorAll('.text-animation');
+            const mailtoLink = document.querySelector('.mailto-link');
+            const mailtoText = mailtoLink.querySelector('span');
             let delay = 0;
-            textElements.forEach((el, index) => {
-                const words = el.textContent.split(' ');
-                el.textContent = '';
-                words.forEach(word => {
-                    const wordSpan = document.createElement('span');
-                    wordSpan.className = 'word';
-                    word.split('').forEach(letter => {
-                        const letterSpan = document.createElement('span');
-                        letterSpan.className = 'letter';
-                        letterSpan.textContent = letter;
-                        wordSpan.appendChild(letterSpan);
+            let animation;
+            let isAnimating = true;
+
+            function skipAnimation() {
+                if (animation) {
+                    animation.pause();
+                    animation.seek(animation.duration);
+                }
+                textElements.forEach(el => {
+                    el.style.opacity = 1;
+                    el.querySelectorAll('.letter').forEach(letter => {
+                        letter.style.opacity = 1;
                     });
-                    el.appendChild(wordSpan);
-                    el.appendChild(document.createTextNode(' '));
                 });
-                el.style.opacity = 1; // Make the container visible
-                anime.timeline({loop: false})
+                mailtoLink.style.opacity = 1;
+                mailtoText.style.opacity = 1;
+                isAnimating = false;
+            }
+
+            function startAnimation() {
+                textElements.forEach((el, index) => {
+                    if (el.classList.contains('mailto-link')) return; // Skip the button
+                    const words = el.textContent.split(' ');
+                    el.textContent = '';
+                    words.forEach(word => {
+                        const wordSpan = document.createElement('span');
+                        wordSpan.className = 'word';
+                        word.split('').forEach(letter => {
+                            const letterSpan = document.createElement('span');
+                            letterSpan.className = 'letter';
+                            letterSpan.textContent = letter;
+                            wordSpan.appendChild(letterSpan);
+                        });
+                        el.appendChild(wordSpan);
+                        el.appendChild(document.createTextNode(' '));
+                    });
+                    el.style.opacity = 1;
+                });
+
+                animation = anime.timeline({loop: false})
                     .add({
-                        targets: el.querySelectorAll('.letter'),
+                        targets: '.text-animation:not(.mailto-link) .letter',
                         opacity: [0,1],
                         easing: "easeInOutQuad",
                         duration: 50,
-                        delay: (el, i) => 25 * (i+1) + delay
+                        delay: (el, i) => 25 * (i+1)
+                    })
+                    .add({
+                        targets: '.mailto-link',
+                        opacity: [0, 1],
+                        duration: 500,
+                        easing: 'easeInOutQuad'
+                    })
+                    .add({
+                        targets: '.mailto-link span',
+                        opacity: [0, 1],
+                        duration: 500,
+                        easing: 'easeInOutQuad'
                     });
-                delay += el.textContent.length * 25 + 500; // Additional delay between paragraphs
+            }
+
+            startAnimation();
+
+            document.addEventListener('keydown', (event) => {
+                if (event.code === 'Space' && isAnimating) {
+                    event.preventDefault();
+                    skipAnimation();
+                }
             });
         });
     </script>

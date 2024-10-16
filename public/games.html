@@ -81,18 +81,20 @@
             border-radius: 0 0 5px 5px;
         }
 
-        .pdf-container {
+        .video-container {
+            position: relative;
             width: 100%;
-            max-width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            overflow: hidden;
             margin: 20px 0;
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
         }
 
-        iframe {
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 500px;
+            height: 100%;
             border: none;
         }
 
@@ -126,8 +128,8 @@
         <h2>Capstone Project</h2>
 
         <p class="image-subtitle">Video demonstration of gameplay:</p>
-        <div class="pdf-container">
-            <iframe src="https://drive.google.com/file/d/1AeY8-R9OSjKKCI-u9PpM_X0OTA44IdHK/preview" title="Bug Snatch Demo"></iframe>
+        <div class="video-container">
+            <iframe src="https://drive.google.com/file/d/1AeY8-R9OSjKKCI-u9PpM_X0OTA44IdHK/preview" title="Bug Snatch Demo" allowfullscreen></iframe>
         </div>
 
         <p><strong>Project Overview</strong><br>
