@@ -6,7 +6,18 @@
     <title>Yron's Website - Projects</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
         header {
             background: #f4f4f4;
             padding: 1rem;
@@ -16,8 +27,26 @@
             text-align: center;
         }
         nav { margin-top: 1rem; display: block; }
-        main { margin-top: 20px; }
-        footer { margin-top: 20px; text-align: center; font-size: 0.8rem; }
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            margin-top: 20px; /* Add some top margin to prevent content from being covered */
+        }
+        .content-wrapper {
+            max-width: 600px;
+            width: 100%;
+            transition: transform 0.5s ease-out;
+        }
+        footer {
+            padding: 8px 0;
+            text-align: center;
+            font-size: 0.8rem;
+            background: #f4f4f4;
+        }
         .social-icons a {
             margin: 0 10px;
             text-decoration: none;
@@ -199,14 +228,14 @@
             <a href="https://github.com/yronk9" target="_blank" aria-label="GitHub">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub">
             </a>
-            <a href="https://www.linkedin.com/in/yron" target="_blank" aria-label="LinkedIn">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/LinkedIn_icon_circle.svg" alt="LinkedIn">
+            <a href="https://linkedin.com/in/yron" target="_blank" aria-label="LinkedIn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn">
             </a>
         </div>
     </footer>
+
     <script>
-        var url = 'Capstone-bugsnatch.pdf';
-        var pdfDoc = null,
+        let pdfDoc = null,
             pageNum = 1,
             pageRendering = false,
             pageNumPending = null,
@@ -214,24 +243,20 @@
             canvas = document.getElementById('pdf-canvas'),
             ctx = canvas.getContext('2d');
 
-        pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
-            pdfDoc = pdfDoc_;
-            document.getElementById('page-count').textContent = pdfDoc.numPages;
-            renderPage(pageNum);
-        });
-
         function renderPage(num) {
             pageRendering = true;
-            pdfDoc.getPage(num).then(function (page) {
-                var viewport = page.getViewport({ scale: scale });
+            pdfDoc.getPage(num).then(function(page) {
+                let viewport = page.getViewport({scale: scale});
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
-                var renderContext = {
+
+                let renderContext = {
                     canvasContext: ctx,
                     viewport: viewport
                 };
-                var renderTask = page.render(renderContext);
-                renderTask.promise.then(function () {
+                let renderTask = page.render(renderContext);
+
+                renderTask.promise.then(function() {
                     pageRendering = false;
                     if (pageNumPending !== null) {
                         renderPage(pageNumPending);
@@ -239,15 +264,29 @@
                     }
                 });
             });
+
             document.getElementById('page-num').textContent = num;
         }
 
-        function changePage(offset) {
-            if (pageNum + offset >= 1 && pageNum + offset <= pdfDoc.numPages) {
-                pageNum += offset;
-                renderPage(pageNum);
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num);
             }
         }
+
+        function changePage(offset) {
+            pageNum = Math.max(1, Math.min(pdfDoc.numPages, pageNum + offset));
+            queueRenderPage(pageNum);
+        }
+
+        pdfjsLib.getDocument('Capstone-bugsnatch.pdf').promise.then(function(pdfDoc_) {
+            pdfDoc = pdfDoc_;
+            document.getElementById('page-count').textContent = pdfDoc.numPages;
+
+            renderPage(pageNum);
+        });
     </script>
 </body>
 </html>
