@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUMON - ACTIVE TASKING</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: black;
+      color: white;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+    #trashCan {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: #555;
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-size: 20px;
+      color: white;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    #trashCan:after {
+      content: '🗑️';
+    }
+    #pagination {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      color: white;
+      font-size: 18px;
+    }
+    #pagination button {
+      background-color: #555;
+      color: white;
+      padding: 5px 10px;
+      margin: 0 5px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    #pagination button:hover {
+      background-color: #777;
+    }
+    #progressBarContainer {
+      position: absolute;
+      top: 50%;
+      left: 20px;
+      width: 10px;
+      height: 200px;
+      background-color: #333;
+      border-radius: 5px;
+    }
+    #progressBar {
+      width: 100%;
+      height: 0;
+      background-color: green;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+<div id="trashCan"></div>
+<div id="pagination">
+  <button id="prevPage">Previous</button>
+  <span id="pageNum">Page 1</span>
+  <button id="nextPage">Next</button>
+</div>
+<div id="progressBarContainer">
+  <div id="progressBar"></div>
+</div>
+
+<script>
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const pageNumElem = document.getElementById('pageNum');
+  const prevPageButton = document.getElementById('prevPage');
+  const nextPageButton = document.getElementById('nextPage');
+  const progressBar = document.getElementById('progressBar');
+
+  // Set canvas to full screen
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const NUM_COUNT = 60;
+  const baseRadius = 30;
+  let numbers = [];
+  let currentPage = 1;
+  const numbersPerPage = 30;
+  let totalCircled = 0;  // Track total circled numbers
+  const targetCircled = 250;  // Target for progress bar
+
+  // Generate random numbers for the current page
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function generateNumbers() {
+    numbers = [];
+    for (let i = 0; i < NUM_COUNT; i++) {
+      numbers.push({
+        value: randomInt(1, 99),
+        x: randomInt(baseRadius, canvas.width - baseRadius),
+        y: randomInt(baseRadius, canvas.height - baseRadius),
+        radius: baseRadius,
+        targetRadius: baseRadius,
+        hovered: false,
+      });
+    }
+  }
+
+  // Handle number shrink and animation towards trash can
+  const trashCan = document.getElementById('trashCan');
+  trashCan.addEventListener('click', () => {
+    // Only animate the numbers that meet the "scary" criteria
+    let scaryNumbers = numbers.filter(n => n.value > 40 && n.value % 2 === 0);
+
+    scaryNumbers.forEach(n => {
+      anime({
+        targets: n,
+        radius: 5,
+        x: canvas.width - 100,
+        y: canvas.height - 100,
+        duration: 1000,
+        easing: 'easeInOutQuad',
+        complete: () => {
+          // Reset numbers after animation
+          generateNumbers();
+        }
+      });
+    });
+  });
+
+  // Lassoing variables
+  let lasso = [];
+  let lassoing = false;
+
+  // Function to check if a point is inside a polygon
+  function pointInPolygon(point, vs) {
+    let [x, y] = point;
+    let inside = false;
+    for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+      let [xi, yi] = vs[i];
+      let [xj, yj] = vs[j];
+      let intersect = ((yi > y) !== (yj > y)) &&
+                      (x < (xj - xi) * (y - yi) / ((yj - yi) + 1e-6) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  // Lassoing events
+  canvas.addEventListener('mousedown', e => {
+    lassoing = true;
+    lasso = [[e.offsetX, e.offsetY]];  // Start path at mouse position
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    if (lassoing) {
+      lasso.push([e.offsetX, e.offsetY]);  // Add new point as mouse moves
+    }
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    lassoing = false;
+    // Check if numbers are inside the lasso polygon and remove them
+    let circledNumbers = [];
+    numbers = numbers.filter(n => {
+      if (pointInPolygon([n.x, n.y], lasso)) {
+        circledNumbers.push(n);
+        //return false;  // Removes the number from the screen if it's inside lasso
+      }
+      return true;
+    });
+    lasso = [];
+
+    // Filter and animate "scary" numbers
+    let scaryNumbers = circledNumbers.filter(n => n.value > 40 && n.value % 2 === 0);
+    
+    // Animate numbers that meet the scary criteria
+    scaryNumbers.forEach(n => {
+      anime({
+        targets: n,
+        radius: 5,
+        x: canvas.width - 100,
+        y: canvas.height - 100,
+        duration: 1000,
+        easing: 'easeInOutQuad',
+        complete: () => {
+          // Reset numbers after animation
+          generateNumbers();
+        }
+      });
+    });
+
+    // Update progress bar
+    totalCircled += scaryNumbers.length;
+    let progress = Math.min((totalCircled / targetCircled) * 100, 100);
+    progressBar.style.height = progress + '%';
+
+    // If we reach 250 numbers circled, display a message
+    if (totalCircled >= targetCircled) {
+      alert("You've circled 250 numbers!");
+    }
+  });
+
+  // Function to draw numbers
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw numbers
+    numbers.forEach(n => {
+      ctx.fillStyle = "white";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = n.radius + "px sans-serif";
+      ctx.fillText(n.value, n.x, n.y);
+    });
+
+    // Draw lasso path
+    if (lasso.length > 1) {
+      ctx.beginPath();
+      ctx.moveTo(lasso[0][0], lasso[0][1]);
+      for (let i = 1; i < lasso.length; i++) {
+        ctx.lineTo(lasso[i][0], lasso[i][1]);
+      }
+      ctx.lineTo(lasso[0][0], lasso[0][1]); // Close the loop
+      ctx.closePath();
+      ctx.strokeStyle = "lime";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  // Paginate to next or previous page
+  prevPageButton.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      pageNumElem.textContent = 'Page ' + currentPage;
+      generateNumbers();
+    }
+  });
+
+  nextPageButton.addEventListener('click', () => {
+    currentPage++;
+    pageNumElem.textContent = 'Page ' + currentPage;
+    generateNumbers();
+  });
+
+  // Hover effect for expanding and shrinking the numbers
+  canvas.addEventListener('mousemove', (e) => {
+    numbers.forEach(n => {
+      const distance = Math.sqrt((e.offsetX - n.x) ** 1 + (e.offsetY - n.y) ** 2);
+      if (distance < n.radius) {
+        if (!n.hovered) {
+          n.hovered = true;
+          anime({
+            targets: n,
+            radius: baseRadius * 1.5,
+            easing: 'easeOutQuad',
+            duration: 300
+          });
+        }
+      } else if (n.hovered) {
+        n.hovered = false;
+        anime({
+          targets: n,
+          radius: baseRadius,
+          easing: 'easeOutQuad',
+          duration: 300
+        });
+      }
+    });
+  });
+
+  generateNumbers();
+  draw();
+</script>
+
+</body>
+</html>
